@@ -4,6 +4,10 @@ function createMap(earthquakes) {
 	var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
 		attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
 		maxZoom: 18,
+		noWrap: true,
+		  bounds: [
+			[-90, -180],
+			[90, 180]],
 		id: "mapbox.light",
 		accessToken: API_KEY
 	});
@@ -12,6 +16,10 @@ function createMap(earthquakes) {
 	var darkmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
 		attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
 		maxZoom: 18,
+		noWrap: true,
+		bounds: [
+			[-90, -180],
+			[90, 180]],
 		id: "mapbox.dark",
 		accessToken: API_KEY
 	});
@@ -20,8 +28,20 @@ function createMap(earthquakes) {
 	var satmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
 		attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
 		maxZoom: 18,
+		noWrap: true,
+		bounds: [
+			[-90, -180],
+			[90, 180]],
 		id: "mapbox.satellite",
 		accessToken: API_KEY
+	});
+	
+	var link = "plateInfo/PB2002_boundaries.json";
+
+	// Grabbing our GeoJSON data..
+	var lines = d3.json(link, function(data) {
+  	// Creating a GeoJSON layer with the retrieved data
+  	L.geoJson(data).addTo(map);
 	});
 
 	// Create a baseMaps object to hold the map options layer
@@ -38,12 +58,16 @@ function createMap(earthquakes) {
 
 	// Create the map object with options
 	var map = L.map("map", {
-		center: [39.8283, -98.5795],
+		center: [0, 0],
+		//center: [39.8283, -98.5795],
 		zoom: 3,
 		layers: [lightmap, earthquakes]
 	});
 	
-		// Add legend
+	var bounds = map.setMaxBounds(map.getBounds());
+	//L.tileLayer.setMaxBounds( [[-90,-180], [90,180]] );
+	
+	// Add legend
 	var legend = L.control({position: "bottomleft"});
 	legend.onAdd = function (map) {
 
@@ -134,9 +158,14 @@ function createAllMarkers(response) {
 }
 
 
-// Perform an API call to the Citi Bike API to get allResponse information. Call createAllMarkers when complete
-d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson", createAllMarkers);
+function createLines(faultLines) {
 
+
+
+}
+
+// Perform an API call to the USGS to get all week earthquake info. Call createAllMarkers when complete
+d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson", createAllMarkers);
 
 
 
