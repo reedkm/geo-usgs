@@ -35,14 +35,6 @@ function createMap(earthquakes) {
 		id: "mapbox.satellite",
 		accessToken: API_KEY
 	});
-	
-	var link = "plateInfo/PB2002_boundaries.json";
-
-	// Grabbing our GeoJSON data..
-	var lines = d3.json(link, function(data) {
-  	// Creating a GeoJSON layer with the retrieved data
-  	L.geoJson(data).addTo(map);
-	});
 
 	// Create a baseMaps object to hold the map options layer
 	var baseMaps = {
@@ -53,7 +45,8 @@ function createMap(earthquakes) {
 
 	// Create an overlayMaps object to hold the allWeek layer
 	var overlayMaps = {
-		"All Earthquakes": earthquakes
+		"All Earthquakes": earthquakes,
+		"Fault Lines": boundaries
 	};
 
 	// Create the map object with options
@@ -61,11 +54,10 @@ function createMap(earthquakes) {
 		center: [0, 0],
 		//center: [39.8283, -98.5795],
 		zoom: 3,
-		layers: [lightmap, earthquakes]
+		layers: [lightmap, earthquakes, boundaries]
 	});
 	
-	var bounds = map.setMaxBounds(map.getBounds());
-	//L.tileLayer.setMaxBounds( [[-90,-180], [90,180]] );
+	//var bounds = map.setMaxBounds(map.getBounds());
 	
 	// Add legend
 	var legend = L.control({position: "bottomleft"});
@@ -88,8 +80,6 @@ function createMap(earthquakes) {
 	return div;
 	};
 	legend.addTo(map);
-	
-	
 
 	// Create a layer control, pass in the baseMaps and overlayMaps. Add the layer control to the map
 	L.control.layers(baseMaps, overlayMaps, {
@@ -112,10 +102,10 @@ function createAllMarkers(response) {
 		var allResponse = allQuakes[index];
 		
 		var d = new Date(allResponse.properties.time);
-		timeStampCon = d.getDate() + '/' + (d.getMonth()) + '/' + d.getFullYear() + " " + d.getHours() + ':' + d.getMinutes();
+		timeStampCon = d.getMonth() + '/' + (d.getDate()) + '/' + d.getFullYear() + " " + d.getHours() + ':' + d.getMinutes();
 		
 		var mag = allResponse.properties.mag;
-		var magScale = allResponse.properties.mag * 2;
+		var magScale = allResponse.properties.mag * 2.5;
 		
 		if(mag < 1.9){							// micro
 			var color = "#4EBF00";
@@ -157,17 +147,17 @@ function createAllMarkers(response) {
 	
 }
 
+// Add fault line, pull data local json
+var link = "plateInfo/PB2002_boundaries.json";
 
-function createLines(faultLines) {
+var boundaries = L.layerGroup();
 
-
-
-}
+d3.json(link, function(data){
+	L.geoJSON(data, {
+		color: '#3232ff',
+		weight: 1
+	}).addTo(boundaries);
+});
 
 // Perform an API call to the USGS to get all week earthquake info. Call createAllMarkers when complete
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson", createAllMarkers);
-
-
-
-
-
